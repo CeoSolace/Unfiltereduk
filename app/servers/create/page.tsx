@@ -42,4 +42,16 @@ export default async function CreateServerPage() {
           type="text"
           name="name"
           placeholder="Server name"
-          className="w-full p-
+          className="w-full p-2 bg-gray-800 rounded mb-4"
+          required
+        />
+        <button
+          type="submit"
+          className="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded"
+        >
+          Create
+        </button>
+      </form>
+    </div>
+  );
+}
