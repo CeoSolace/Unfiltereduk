@@ -1,22 +1,21 @@
 // models/ServerLink.ts
 import { connectAuthDB } from '@/lib/db';
-import { model, Schema } from 'mongoose';
+import { Schema, model, Model } from 'mongoose';
 
 const serverLinkSchema = new Schema({
-  serverId: String,
+  serverId: { type: String, unique: true },
   ownerId: String,
   dbName: String,
   dbUri: String,
-  cloudinary: {
-    cloudName: String,
-    apiKey: String,
-    apiSecret: String,
-  },
   encryptedServerKey: String,
 });
 
-// Get connection and define model once
-const authDb = await connectAuthDB();
-const ServerLink = authDb.model('ServerLink', serverLinkSchema);
+let ServerLinkModel: Model<any> | null = null;
 
-export default ServerLink;
+export default async function getServerLinkModel(): Promise<Model<any>> {
+  if (!ServerLinkModel) {
+    const db = await connectAuthDB();
+    ServerLinkModel = db.model('ServerLink', serverLinkSchema);
+  }
+  return ServerLinkModel;
+}
