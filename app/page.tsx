@@ -1,28 +1,31 @@
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
-import jwt from 'jsonwebtoken';
-import AuthForm from '@/components/AuthForm';
-import AuthToggle from '@/components/AuthToggle'; // ✅
+// Server Component: public landing with clear CTAs
+import Link from 'next/link';
 
-export default async function HomePage() {
-  const token = cookies().get('auth_token')?.value;
-  if (token) {
-    try {
-      jwt.verify(token, process.env.JWT_SECRET!);
-      redirect('/servers');
-    } catch (e) {
-      cookies().delete('auth_token');
-    }
-  }
-
+export default function HomePage() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900">
-      <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold text-white mb-2">Unfiltered UK</h1>
-        <p className="text-gray-400">Decentralised. Encrypted. Yours.</p>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900 p-4">
+      <div className="text-center max-w-2xl">
+        <h1 className="text-5xl md:text-6xl font-bold text-white mb-4">
+          Unfiltered UK
+        </h1>
+        <p className="text-xl text-gray-400 mb-10">
+          Decentralised. Encrypted. Community-owned.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <Link
+            href="/login"
+            className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-lg transition"
+          >
+            Log In
+          </Link>
+          <Link
+            href="/signup"
+            className="px-6 py-3 bg-gray-800 hover:bg-gray-700 text-white font-medium rounded-lg border border-gray-700 transition"
+          >
+            Sign Up
+          </Link>
+        </div>
       </div>
-      <AuthForm mode="login" />
-      <AuthToggle /> {/* ✅ Safe: self-contained Client Component */}
     </div>
   );
 }
