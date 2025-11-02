@@ -10,7 +10,7 @@ const userSchema = new Schema({
   ip_psi: String,
 });
 
-let UserModel: Model<any>;
+let UserModel: Model<any> | null = null;
 
 export default async function getUserModel(): Promise<Model<any>> {
   if (!UserModel) {
