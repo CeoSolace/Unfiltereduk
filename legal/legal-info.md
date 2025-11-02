@@ -8,7 +8,7 @@ No corporate entity is involved.
 This platform operates under UK law. All disputes subject to English courts.
 
 **Contact**  
-For legal requests: legal@unfiltereduk.dev (PGP encrypted preferred)
+For legal requests: legal@unfiltereduk.co.uk (PGP encrypted preferred)
 
 **Transparency**  
 - Source code: public on GitHub  
