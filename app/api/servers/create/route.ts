@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { randomBytes } from 'crypto';
 import { connectAuthDB } from '@/lib/db';
+import { encryptAESKey } from '@/lib/encryption';
 
 export async function POST(req: NextRequest) {
   try {
@@ -14,9 +15,7 @@ export async function POST(req: NextRequest) {
     const dbUri = `${process.env.MONGO_BASE_URI}${dbName}`;
 
     const serverMessageKey = randomBytes(32).toString('hex');
-    const cipher = require('crypto').createCipher('aes-256-cbc', process.env.JWT_SECRET!);
-    let encryptedKey = cipher.update(serverMessageKey, 'utf8', 'hex');
-    encryptedKey += cipher.final('hex');
+    const encryptedServerKey = encryptAESKey(serverMessageKey);
 
     const authDb = await connectAuthDB();
     const ServerLink = authDb.model('ServerLink', {
@@ -29,7 +28,6 @@ export async function POST(req: NextRequest) {
 
     await ServerLink.create({ serverId, ownerId, dbName, dbUri, encryptedServerKey });
 
-    // Create server DB
     const mongoose = (await import('mongoose')).default;
     const newConn = await mongoose.createConnection(dbUri);
     const ServerMeta = newConn.model('ServerMeta', { name: String, ownerId: String });
