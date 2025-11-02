@@ -1,19 +1,24 @@
-// Unified settings: profile, subscription, DM archiving, security
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import jwt from 'jsonwebtoken';
-import { connectAuthDB } from '@/lib/db';
+import getUserModel from '@/models/User';
 
 export default async function SettingsPage() {
   const token = cookies().get('auth_token')?.value;
-  if (!token) redirect('/');
-  
-  const payload = jwt.verify(token, process.env.JWT_SECRET!) as { id: string };
-  const userId = payload.id;
+  if (!token) redirect('/login');
 
-  const authDb = await connectAuthDB();
-  const User = authDb.model('User', { subscriptionPlan: String });
+  let userId: string;
+  try {
+    const payload = jwt.verify(token, process.env.JWT_SECRET!) as { id: string };
+    userId = payload.id;
+  } catch (e) {
+    cookies().delete('auth_token');
+    redirect('/login');
+  }
+
+  const User = await getUserModel();
   const user = await User.findById(userId);
+  if (!user) redirect('/login');
 
   return (
     <div className="max-w-4xl mx-auto p-6">
@@ -25,7 +30,7 @@ export default async function SettingsPage() {
           <h2 className="font-bold mb-2">Subscription</h2>
           <p className="text-gray-300 mb-3">Current: <span className="capitalize">{user.subscriptionPlan}</span></p>
           <a
-            href="/settings/subscription"
+            href="/unftro"
             className="text-blue-400 hover:underline text-sm"
           >
             Change plan →
@@ -45,7 +50,18 @@ export default async function SettingsPage() {
         {/* Security */}
         <div className="bg-gray-800 p-4 rounded">
           <h2 className="font-bold mb-2">Security</h2>
-          <button className="text-red-400 hover:underline text-sm">Log out of all sessions</button>
+          <form action={async () => {
+            'use server';
+            cookies().delete('auth_token');
+            redirect('/');
+          }}>
+            <button
+              type="submit"
+              className="text-red-400 hover:underline text-sm"
+            >
+              Log out of all sessions
+            </button>
+          </form>
         </div>
       </div>
     </div>
