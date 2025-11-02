@@ -1,3 +1,5 @@
+"use client"; // 👈 ADD THIS LINE
+
 // Reusable login/registration form
 import { useState } from 'react';
 
