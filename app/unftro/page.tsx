@@ -63,7 +63,7 @@ const PLANS = [
     description: 'Empower your communities',
     features: [
       '✨ Everything in Nitro',
-      '⏫ 2 Server Boosts (unlock perks)',
+      '⏫ 2 Server Boosts',
       '🧑‍💻 Priority support',
       '📁 200 uploads/day (200MB)',
       '🎨 Custom themes & banners',
@@ -85,8 +85,8 @@ const PLANS = [
       '📁 500 uploads/day (500MB)',
       '📺 4K streaming',
       '👑 VIP golden badge',
-      '🔮 Beta & experimental tools',
-      '🌐 Custom domain (Q1 2026)'
+      '🔮 Beta programs',
+      '🌐 Custom domain (coming)'
     ],
     cta: 'Go Ultra',
     disabled: false,
@@ -107,15 +107,14 @@ export default function UnftroPage() {
           const { id, subscriptionPlan } = await res.json();
           setUserId(id);
           setCurrentPlan(subscriptionPlan || 'free');
-        } else {
-          router.push('/login');
         }
-      } catch {
-        router.push('/login');
+        // ✅ Do NOT redirect on failure — stay on page
+      } catch (e) {
+        // Silent fail — user sees "Log In" CTA
       }
     };
     fetchUser();
-  }, [router]);
+  }, []);
 
   const handleCheckout = async (planId: string) => {
     if (!userId || planId === 'free') return;
@@ -133,16 +132,16 @@ export default function UnftroPage() {
       const { url } = await res.json();
       if (url) window.location.href = url;
     } catch (e) {
-      alert('Failed to start checkout. Try again.');
+      alert('Checkout failed. Please try again.');
     }
   };
 
   const getColorClasses = (color: string) => {
     switch (color) {
-      case 'blue': return 'border-blue-500 hover:border-blue-400';
-      case 'purple': return 'border-purple-500 hover:border-purple-400';
-      case 'pink': return 'border-pink-500 hover:border-pink-400';
-      case 'gold': return 'border-yellow-500 hover:border-yellow-400';
+      case 'blue': return 'border-blue-500';
+      case 'purple': return 'border-purple-500';
+      case 'pink': return 'border-pink-500';
+      case 'gold': return 'border-yellow-500';
       default: return 'border-gray-700';
     }
   };
@@ -150,7 +149,6 @@ export default function UnftroPage() {
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100 py-16 px-4">
       <div className="max-w-7xl mx-auto">
-        {/* Hero */}
         <div className="text-center mb-20">
           <h1 className="text-5xl md:text-6xl font-extrabold mb-6">
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500">
@@ -158,36 +156,27 @@ export default function UnftroPage() {
             </span>
           </h1>
           <p className="text-xl text-gray-400 max-w-3xl mx-auto">
-            Unlock the full power of decentralised, encrypted communities.  
-            Your data. Your rules. Your status.
+            Unlock the full power of decentralised, encrypted communities.
           </p>
         </div>
 
-        {/* Plans Grid */}
         <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
           {PLANS.map((plan) => {
             const isCurrent = currentPlan === plan.id;
-            const isPopular = plan.popular;
-
             return (
               <div
                 key={plan.id}
-                className={`relative bg-gray-800 rounded-2xl p-6 border transition-all duration-300 ${
-                  isPopular 
-                    ? 'border-purple-500 scale-105' 
-                    : getColorClasses(plan.color)
-                } ${
-                  isCurrent ? 'ring-2 ring-green-500' : ''
-                }`}
+                className={`relative bg-gray-800 rounded-2xl p-6 border ${
+                  plan.popular ? 'border-purple-500 scale-105' : getColorClasses(plan.color)
+                } ${isCurrent ? 'ring-2 ring-green-500' : ''}`}
               >
-                {isPopular && (
+                {plan.popular && (
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                     <span className="bg-purple-600 text-white text-xs font-bold px-4 py-1 rounded-full">
                       MOST POPULAR
                     </span>
                   </div>
                 )}
-
                 {isCurrent && (
                   <div className="absolute top-4 right-4">
                     <span className="bg-green-600 text-white text-xs px-2 py-1 rounded">
@@ -203,30 +192,29 @@ export default function UnftroPage() {
                     <span className="text-4xl font-extrabold">{plan.price}</span>
                     <span className="text-gray-500">/mo</span>
                   </div>
-                  <ul className="space-y-3 mb-8">
-                    {plan.features.map((feature, i) => (
-                      <li key={i} className="flex items-start text-sm">
-                        <span className="mr-2">•</span>
-                        <span dangerouslySetInnerHTML={{ __html: feature }} />
+                  <ul className="space-y-3 mb-8 text-sm">
+                    {plan.features.map((f, i) => (
+                      <li key={i} className="flex items-start">
+                        <span className="mr-2">•</span> {f}
                       </li>
                     ))}
                   </ul>
                   <button
                     onClick={() => handleCheckout(plan.id)}
-                    disabled={plan.disabled || isCurrent}
-                    className={`w-full py-3 rounded-lg font-medium transition ${
+                    disabled={plan.disabled || isCurrent || !userId}
+                    className={`w-full py-3 rounded-lg font-medium ${
                       isCurrent
                         ? 'bg-green-600 cursor-default'
-                        : plan.disabled
+                        : !userId
                         ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
                         : plan.id === 'ultra'
-                        ? 'bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-500 hover:to-orange-500 text-white'
+                        ? 'bg-gradient-to-r from-yellow-600 to-orange-600 text-white'
                         : plan.popular
                         ? 'bg-purple-600 hover:bg-purple-500 text-white'
                         : 'bg-blue-600 hover:bg-blue-500 text-white'
                     }`}
                   >
-                    {isCurrent ? 'Active' : plan.cta}
+                    {!userId ? 'Log In to Upgrade' : isCurrent ? 'Active' : plan.cta}
                   </button>
                 </div>
               </div>
@@ -234,10 +222,9 @@ export default function UnftroPage() {
           })}
         </div>
 
-        {/* Trust Footer */}
         <div className="mt-20 text-center text-gray-500 text-sm">
           <p>All plans include end-to-end encryption, IP anonymisation, and full server ownership.</p>
-          <p className="mt-2">Cancel anytime. No hidden fees.</p>
+          <p>Cancel anytime.</p>
         </div>
       </div>
     </div>
