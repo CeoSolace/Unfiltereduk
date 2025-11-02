@@ -14,13 +14,12 @@
     "cookie": "^0.6.0",
     "crypto-js": "^4.2.0",
     "jsonwebtoken": "^9.0.2",
+    "marked": "^12.0.2",
     "mongoose": "^8.3.0",
     "next": "14.2.3",
     "node-rsa": "^1.1.1",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "remark": "^14.0.3",
-    "remark-html": "^16.0.1",
     "socket.io": "^4.7.5",
     "stripe": "^15.10.0"
   },
@@ -32,5 +31,8 @@
     "postcss": "^8.4.38",
     "tailwindcss": "^3.4.3",
     "typescript": "5.4.5"
+  },
+  "engines": {
+    "node": ">=20.12.0 <23.0.0"
   }
 }
