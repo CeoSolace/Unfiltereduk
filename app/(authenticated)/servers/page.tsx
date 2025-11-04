@@ -18,7 +18,6 @@ export default async function ServersPage() {
     redirect('/login');
   }
 
-  // ✅ Use cached models — no redefinition
   const ServerLink = await getServerLinkModel();
   const ServerMembership = await getServerMembershipModel();
 
