@@ -1,6 +1,6 @@
 // models/ServerMembership.ts
 import { connectAuthDB } from '@/lib/db';
-import { Schema, model, models } from 'mongoose';
+import { Schema, model } from 'mongoose';
 
 const serverMembershipSchema = new Schema({
   userId: { type: String, required: true },
@@ -8,17 +8,26 @@ const serverMembershipSchema = new Schema({
   joinedAt: { type: Date, default: Date.now },
 });
 
-// Optional: Add compound index for performance
 serverMembershipSchema.index({ userId: 1, serverId: 1 }, { unique: true });
 
-export default async function getServerMembershipModel() {
-  const db = await connectAuthDB();
+let cachedModel: any = null;
+let cachedConn: any = null;
 
-  // Use Mongoose's per-connection model cache
-  const modelName = 'ServerMembership';
-  if (db.models[modelName]) {
-    return db.models[modelName];
+export default async function getServerMembershipModel() {
+  const conn = await connectAuthDB();
+
+  // Critical: Only use cached model if from the SAME connection
+  if (cachedConn === conn && cachedModel) {
+    return cachedModel;
   }
 
-  return db.model(modelName, serverMembershipSchema);
+  // Use connection-specific model cache
+  if (conn.models.ServerMembership) {
+    cachedModel = conn.models.ServerMembership;
+  } else {
+    cachedModel = conn.model('ServerMembership', serverMembershipSchema);
+  }
+
+  cachedConn = conn;
+  return cachedModel;
 }
