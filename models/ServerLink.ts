@@ -1,6 +1,6 @@
 // models/ServerLink.ts
 import { connectAuthDB } from '@/lib/db';
-import { Schema, model, Model } from 'mongoose';
+import { Schema, model, models } from 'mongoose';
 
 const serverLinkSchema = new Schema({
   serverId: { type: String, unique: true },
@@ -10,12 +10,13 @@ const serverLinkSchema = new Schema({
   encryptedServerKey: String,
 });
 
-let ServerLinkModel: Model<any> | null = null;
+export default async function getServerLinkModel() {
+  const db = await connectAuthDB();
 
-export default async function getServerLinkModel(): Promise<Model<any>> {
-  if (!ServerLinkModel) {
-    const db = await connectAuthDB();
-    ServerLinkModel = db.model('ServerLink', serverLinkSchema);
+  // Use Mongoose's internal cache
+  if (models.ServerLink) {
+    return models.ServerLink;
   }
-  return ServerLinkModel;
+
+  return model('ServerLink', serverLinkSchema);
 }
