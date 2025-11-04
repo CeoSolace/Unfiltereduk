@@ -22,27 +22,50 @@ export default async function CreateServerPage() {
         action={async (formData) => {
           'use server';
           const name = formData.get('name') as string;
+          const mongoUri = formData.get('mongoUri') as string;
+
+          if (!mongoUri || !mongoUri.startsWith('mongodb')) {
+            throw new Error('Valid MongoDB URI required');
+          }
+
           const res = await fetch(`${process.env.RENDER_PUBLIC_URL}/api/servers/create`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, ownerId: userId }),
+            body: JSON.stringify({ name, ownerId: userId, mongoUri }),
           });
+
           if (res.ok) {
             const { serverId } = await res.json();
             redirect(`/servers/${serverId}`);
           } else {
-            throw new Error('Failed to create server');
+            const err = await res.json();
+            throw new Error(err.error || 'Creation failed');
           }
         }}
         className="space-y-4"
       >
-        <input
-          type="text"
-          name="name"
-          placeholder="Server name"
-          className="w-full p-2 bg-gray-800 rounded"
-          required
-        />
+        <div>
+          <label className="block mb-1">Server Name</label>
+          <input
+            type="text"
+            name="name"
+            className="w-full p-2 bg-gray-800 rounded"
+            required
+          />
+        </div>
+        <div>
+          <label className="block mb-1">Your MongoDB URI (for this server)</label>
+          <input
+            type="text"
+            name="mongoUri"
+            placeholder="mongodb+srv://user:pass@cluster.xxxxx.mongodb.net/server_xxx"
+            className="w-full p-2 bg-gray-800 rounded font-mono text-sm"
+            required
+          />
+          <p className="text-xs text-gray-500 mt-1">
+            Each server uses its own database. You own and manage this URI.
+          </p>
+        </div>
         <button
           type="submit"
           className="w-full py-2 bg-blue-600 hover:bg-blue-500 rounded"
